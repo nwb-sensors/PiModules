@@ -18,6 +18,7 @@ import xmltodict
 import socket
 import RPi.GPIO as GPIO
 
+from subprocess import call
 from pimodules.daemon import Daemon
 from pimodules.alerts import sendEmail
 from pimodules import configuration
@@ -48,6 +49,10 @@ class fssd(Daemon):
 
 		self.config = self.config['root']['fssd:config']['fssd:alerts']['fssd:email']
 		self.config['fssd:enabled'] = (self.config['fssd:enabled'] == 'True')
+		if self.config['root']['fssd:config']['fssd:alerts']['fssd:custom-script']
+			self.config['fssd:custom-script'] = self.config['root']['fssd:config']['fssd:alerts']['fssd:custom-script']
+		else:
+			self.config['fssd:custom-script'] = 'False'
 
 		signal.signal(signal.SIGTERM, self.sigcatch)
 
@@ -92,6 +97,7 @@ class fssd(Daemon):
 			# pin is low, this is shutdown signal from pico
 			self.counter += 1
 			self.log.warning("Lost power supply, Pi will shutdown")
+			self.custom_script()
 			self.alert_email()
 			time.sleep(2)
 			os.system('/sbin/shutdown -h now')
@@ -134,6 +140,18 @@ class fssd(Daemon):
 		except:
 			self.log.error("Unexpected error in alert_email:", sys.exc_info()[0])
 
+	def custom_script(self):
+		try:
+			if not self.config['fssd:custom-script']:
+				self.log.debug("Custom script is disabled")
+				return True
+
+			call(self.config['fssd:custom-script']['fssd:script'])
+		except socket.error as e:
+			self.log.error(format("Exception in custom_script: %d, %s" % (e.errno, e.strerror)))
+		except:
+			self.log.error("Unexpected error in custom_script:", sys.exc_info()[0])
+
 
 	def run(self):
 		"""
@@ -165,9 +183,8 @@ group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument("-d", "--debug", help="Keep in the foreground, do not daemonize", action="store_true", default=False)
 group.add_argument("-p", "--pid-file", help="PID file")
 args = parser.parse_args()
-	
+
 sd = fssd(args.pid_file, args.xml_config, {'info':logging.INFO, 'debug':logging.DEBUG}[args.log_level])
 
 # the argument to the start method is opposite of debug
 sd.start(not args.debug)
-
