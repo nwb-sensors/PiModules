@@ -50,6 +50,7 @@ class fssd(Daemon):
 		self.config = self.config['root']['fssd:config']['fssd:alerts']['fssd:email']
 		self.config['fssd:enabled'] = (self.config['fssd:enabled'] == 'True')
 		if self.config['root']['fssd:config']['fssd:alerts']['fssd:custom-script']
+			self.log.error("custom script")
 			self.config['fssd:custom-script'] = self.config['root']['fssd:config']['fssd:alerts']['fssd:custom-script']
 		else:
 			self.config['fssd:custom-script'] = 'False'
