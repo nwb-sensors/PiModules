@@ -3,10 +3,11 @@
 #####################################################################################
 # pico_status.py
 # author 		: Kyriakos Naziris
-# modified by 	: Siewert Lameijer aka Siewert308SW
+# modified by 		: Siewert Lameijer aka Siewert308SW
+# modified by		: janmagnet
 # since			: 31-12-2016
-# updated		: 30-3-2017
-# Script to show you some statistics pulled from your UPS PIco HV3.0A
+# updated		: 10-06-2019
+# Script to show you some statistics pulled from your UPS PIco HV3.0A/B/B+
 
 # -*- coding: utf-8 -*-
 # improved and completed by PiModules Version 1.0 29.08.2015
@@ -15,6 +16,8 @@
 #
 # Improved and modified for PiModules PIco HV3.0A Stack Plus / Plus / Top
 # by Siewert Lameijer aka Siewert308SW
+#
+# Improved for PiModules PIco HV3.0B/B+ by janmagnet
 #####################################################################################
 
 #####################################################################################
@@ -81,13 +84,25 @@ def bat_version():
    time.sleep(0.1)
    data = i2c.read_byte_data(0x6b, 0x07)
    if (data == 0x46):
-      return "LiFePO4 (ASCII : F)"
+      return "LiFePO4 (ASCII : F) used in version Stack/Top-End"
    elif (data == 0x51):
-      return "LiFePO4 (ASCII : Q)"
+      return "LiFePO4 (ASCII : Q) used in version Plus/Advanced"
    elif (data == 0x53):
-      return "LiPO (ASCII: S)"
+      return "LiPO (ASCII: S) used in version Stack/Top-End"
    elif (data == 0x50):
-      return "LiPO (ASCII: P)"       
+      return "LiPO (ASCII: P) used in version Plus/Advanced"
+   elif (data == 0x49):
+      return "Li-Ion ASCII : I) used in version Stack/Top-End"
+   elif (data == 0x4f):
+      return "Li-Ion (ASCII : O) used in version Plus/Advanced"
+   elif (data == 0x48):
+      return "NiMH (ASCII : H) used in version Stack/Top-End"
+   elif (data == 0x4d):
+      return "NiMH (ASCII : M) used in version Plus/Advanced"
+   elif (data == 0x4c):
+      return "SAL (ASCII : L) used in version Stack/Top-End"
+   elif (data == 0x41):
+      return "SAL (ASCII : A) used in version Plus/Advanced"
    else:
       return "ERROR"
 	  
@@ -112,13 +127,13 @@ def bat_percentage():
    time.sleep(0.1)
    datavolts = bat_level()
    databattery = bat_version()
-   if (databattery == "LiFePO4 (ASCII : F)") or (databattery == "LiFePO4 (ASCII : Q)"):
+   if (databattery == "LiFePO4 (ASCII : F) used in version Stack/Top-End") or (databattery == "LiFePO4 (ASCII : Q) used in version Plus/Advanced"):
 		databatminus = datavolts-2.90
-		datapercentage = ((databatminus/0.70))*100
-   elif (databattery == "LiPO (ASCII: S)") or (databattery == "LiPO (ASCII: P)"):
+		return int (((databatminus/0.70))*100)
+   elif (databattery == "LiPO (ASCII: S) used in version Stack/Top-End") or (databattery == "LiPO (ASCII: P) used in version Plus/Advanced"):
 		databatminus = datavolts-3.4
-		datapercentage = ((databatminus/0.899))*100
-   return int (datapercentage)
+		return int (((databatminus/0.899))*100)
+   return "N/A"
    
    
 def charger_state():
@@ -127,14 +142,14 @@ def charger_state():
    battpercentage = bat_percentage() 
    powermode = pwr_mode()
    databattery = bat_version()
-   if (databattery == "LiFePO4 (ASCII : F)") or (databattery == "LiFePO4 (ASCII : Q)"):
+   if (databattery == "LiFePO4 (ASCII : F) used in version Stack/Top-End") or (databattery == "LiFePO4 (ASCII : Q) used in version Plus/Advanced"):
 	 if (data == 0x00) and (powermode == "BAT POWERED"):		
 		return "DISCHARGING"
 	 if (data == 0x01) and (powermode == "RPi POWERED"):	
 		return "CHARGING"
 	 if (data == 0x00) and (powermode == "RPi POWERED"):		
 		return "CHARGED"		
-   if (databattery == "LiPO (ASCII: S)") or (databattery == "LiPO (ASCII: P)"):
+   if (databattery == "LiPO (ASCII: S) used in version Stack/Top-End") or (databattery == "LiPO (ASCII: P) used in version Plus/Advanced"):
      if (data == 0x00) and (powermode == "BAT POWERED"):
 		return "DISCHARGING"   
      if (data == 0x00) and (powermode == "RPi POWERED"):
@@ -243,8 +258,8 @@ def rs232_state():
    
 print " "
 print "**********************************************"
-print "*      	    UPS PIco HV3.0A Status           *"
-print "*      	         Version 6.0                 *"
+print "*      	 UPS PIco HV3.0A/B/B+ Status        *"
+print "*      	         Version 7.0                *"
 print "**********************************************"
 print " "
 print " ","- PIco Firmware..........:",fw_version()
