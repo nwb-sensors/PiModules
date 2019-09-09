@@ -17,7 +17,8 @@ Documentation
 
 * pico_status
 
-PIco Status Script - Script to show you some statistics pulled from your UPS PIco HV3.0A.
+PIco Status Script - Script to show you some statistics pulled from your UPS PIco HV3.0b+.
+This fork adds data from System Information register
 
 * temp_fan
 
