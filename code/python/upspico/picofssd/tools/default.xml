@@ -14,6 +14,9 @@
 				<fssd:security></fssd:security>
 				<fssd:port></fssd:port>
 			</fssd:email>
+			<fssd:custom-script>
+				<fssd:script></fssd:script>
+			</fssd:custom-script>
 		</fssd:alerts>
 	</fssd:config>
 </root>
