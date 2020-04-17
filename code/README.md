@@ -1,15 +1,23 @@
 
-Code
-====
+Python
+======
 
 Contents
 --------
 
+* package/
 
-* c/
+Generic Python package which contains code which could relate to multiple PiModules(R) products.
 
-C software.
+* upspico/
 
-* python/
+Code relating specifically to the PiModules(R) UPS PIco, uninterruptible power supply.
 
-Python code.
+* LICENSE
+
+Text of the Gnu General Public License version 3.
+
+* README.md
+
+This file.
+
