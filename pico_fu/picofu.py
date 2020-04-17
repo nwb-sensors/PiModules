@@ -4,46 +4,46 @@
 # -*- coding: iso8859_2 -*-
 #===============================================================================
 #
-# USAGE:        picofu.py -f <fw_file> [ -v | -h | -s | -p serial | --force ]
+# USAGE:        picofu.py -f <fw_file> [ -v | -h | -s | -p serial | --force ] 
 #
 # DESCRIPTION:
-#               This script uploads firmware to UPS PIco. Only mandatory input is new UPS PIco firmware.
+#               This script uploads firmware to UPS PIco. Only mandatory input is new UPS PIco firmware.   
 #
 # RETURN CODES:
-#               0 - Sucessfull update
-#               1 - Failed to parse command line arguments
-#               2 - Failed to establish communication with the UPS PIco
-#               3 - Incompatible UPS PIco powering mode (DISABLED FOR NOW)
-#               4 - Failed to validate firmware file
-#               5 - Failed during the FW upload
+#               0 - Sucessfull update   
+#               1 - Failed to parse command line arguments   
+#               2 - Failed to establish communication with the UPS PIco   
+#               3 - Incompatible UPS PIco powering mode (DISABLED FOR NOW)   
+#               4 - Failed to validate firmware file   
+#               5 - Failed during the FW upload   
 #
 # OPTIONS:      ---
-# REQUIREMENTS:
+# REQUIREMENTS: 
 #               python-serial
 #               python-smbus
 #               Propoer HW setup and setup of Pi to enable Serial/I2C communication based on the UPS PIco manual
 # BUGS:         ---
 # NOTES:        Updated for the UPS PIco by www.pimodules.com
-# AUTHOR:       Vit SAFAR <PIco@safar.info>
+# AUTHOR:       Vit SAFAR <PIco@safar.info> 
 # VERSION:      1.4 adopted for UPS PIco December 2014 by PiModules
 # CREATED:      2.6.2014
-# REVISION:
-#                  v1.0  16.4.2014 - Vit SAFAR
+# REVISION: 
+#	              v1.0  16.4.2014 - Vit SAFAR
 #                 - Initial release
-#                  v1.1  17.4.2014 - Vit SAFAR
+#	              v1.1  17.4.2014 - Vit SAFAR
 #                 - Added code documentation
-#                 - Some speed-up optimisations
-#                  v1.2  19.4.2014 - Vit SAFAR
+#                 - Some speed-up optimisations    
+#	              v1.2  19.4.2014 - Vit SAFAR
 #                 - Disabled the power detection, until automatic switch to bootloader mode is enabled
-#                  v1.3  2.6.2014 - Vit SAFAR
-#                 - Fixed communication issue by adding dummy ';HELLO' command
+#	              v1.3  2.6.2014 - Vit SAFAR
+#                 - Fixed communication issue by adding dummy ';HELLO' command 
 #
 # TODO:         - Detect FW version
 #               - Automatic switch to bootloader mode using @command when available
-#               - Automatically enable of the I2C sw components in Pi (load kernel modules) if not done
-#               - Perform optimisation of the FW file to speed up the upload process
+#               - Automatically enable of the I2C sw components in Pi (load kernel modules) if not done 
+#               - Perform optimisation of the FW file to speed up the upload process     
 #               - Make the switch to bootloader mode interactive for users who does not have the I2C interface available.
-#               - Show UPS PIco @status after firmware update
+#               - Show UPS PIco @status after firmware update 
 #               - Detect progress of the factory reset, not just wait :)
 #               - Set UPS PIco RTC clock after factory reset to the system time
 #
@@ -52,7 +52,7 @@ import sys
 import time
 import datetime
 import os
-import re
+import re     
 import getopt
 
 import smbus
@@ -63,17 +63,18 @@ import datetime
 #import psutil
 
 i2c = smbus.SMBus(1)
-
+  
 class FWUpdate(object):
-  """
-    Only class performing the FW update
+  """ 
+    Only class performing the FW update 
     The class performs following tasks
       1) Check the command line arguments and performs validation of the expected/required parameters
-      2) Pereform detection of the Pi powering scheme via I2C or Serial interface
+      2) Pereform detection of the Pi powering scheme via I2C or Serial interface 
       3) Perform validation of the FW file
       4) Verify the connectivity to UPS PIco bootloader is working
       5) Perform FW update
       6) Perform UPS PIco factory reset
+  
   """
 
   # running in verbose mode
@@ -83,14 +84,14 @@ class FWUpdate(object):
   # skip validation of the FW
   skip=False
   # firmware file
-  filename=False
+  filename=False 
   # default serial port
   port='/dev/serial0'
   # serial connection established on bloader level
   seria_bloader=False
   # status of the i2c serial feature
   i2c=False
-  # detected i2c bus
+  # detected i2c bus  
   i2c_bus=False
   # default I2C port of UPS PIco control interface
   i2c_port=0x69
@@ -99,8 +100,9 @@ class FWUpdate(object):
   # if power not via Pi USB and already warned about via Pi powering requirement
   power_warned=False
 
-  def __init__(self):
 
+  def __init__(self):
+  
     # check if smbus module is deployed and load it if possible
     try:
       import smbus
@@ -117,10 +119,10 @@ class FWUpdate(object):
     except:
       print 'ERROR: Serial support is missing. Please install pyserial support for python to enable additional functionality! (sudo apt-get install python-serial)'
       sys.exit(2)
-
+      
     # parse command line arguments
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'vhf:sp:', ['help', 'force' ])
+    	opts, args = getopt.getopt(sys.argv[1:], 'vhf:sp:', ['help', 'force' ])
     except getopt.GetoptError, err:
       # print help information and exit:
       print str(err) # will print something like "option -a not recognized"
@@ -162,43 +164,41 @@ class FWUpdate(object):
     if not os.path.exists(self.port):
       print 'ERROR: Serial port "'+str(self.port)+'" cannot be found!'
       sys.exit(1)
-
-    # Check if fw filename is defined
+  
+    # Check if fw filename is defined 
     if not self.filename:
       print 'ERROR: Firmware filename has to be defined! :)'
       sys.exit(1)
-
+      
     # check the powering option is ok
     ####self.power_detect()
-
+        
     # validsate the provided firmware file
     if not self.skip:
       self.validate()
     else:
       if self.verbose: print 'WARNING: Skipping firmware validation'
-
+    
     # verify bootloader connectivity
     self.serial_check()
-
+    
     # launch FW upload
     self.fw_upload()
-
+    
     # Execute factory reset of UPS PIco
     self.factory_reset()
 
-
-  def power_detect(self):
   """
   2) Detects the powering status of the Pi
-    a) Check the power status via I2C bus 0 and 1
-        (most common way to do it in the future?)
-    b) In case that no answer found (yes or no), check via serial port.
-      - We expect to have serial port in the bootloader mode at this time,
-      so @command on serial interface is not available and it will fail in
-      most of the cases
+    a) Check the power status via I2C bus 0 and 1 (most common way to do it in the future?)
+    b) In case that no answer found (yes or no), check via serial port. 
+      - We expect to have serial port in the bootloader mode at this time, so @command on serial interface is not available and it will fail in most of the cases
+        
   """
+  def power_detect(self):
     if self.verbose: print 'INFO: Detecting power setup'
-    # check if the system is powered via Pi USB connector
+
+    # check if the system is powered via Pi USB connector  
     if self.i2c:
       # it's I2C we expect somthing to go wrong :)
       try:
@@ -223,11 +223,11 @@ class FWUpdate(object):
             print 'ERROR: (I2C-0) System has to be powered via the Pi USB port. There is a PIco reset after a FW update, that would perform hard reset of Pi! (use --force to disable this check)'
             sys.exit(3)
       except SystemExit as e:
-        sys.exit(e)
+        sys.exit(e)      
       except:
         pass
       if not self.power:
-        try:
+        try:  
           if self.verbose: print 'INFO: Probing I2C bus 1'
           # open connection to the first I2C bus (applicable mainly for the Rev.2 Pi boards)
           bus = self.smbus.SMBus(1)
@@ -249,10 +249,11 @@ class FWUpdate(object):
               print 'ERROR: (I2C-1) System has to be powered via the Pi USB port. There is a UPS PIco reset after a FW update, that would perform hard reset of Pi! (use --force to disable this check)'
               sys.exit(3)
         except SystemExit as e:
-          sys.exit(e)
+          sys.exit(e)      
         except:
           pass
-    # in case power status not ok and we have not detected wrong power status already, check via Serial as a failback method (even though it is expected to fail also due to the bootloader mode requirement)
+    
+    # in case power status not ok and we have not detected wrong power status already, check via Serial as a failback method (even though it is expected to fail also due to the bootloader mode requirement) 
     if not self.power and not self.power_warned:
       if self.verbose: print 'INFO: Probing serial port'
       # Set up the connection to the UPS PIco
@@ -269,7 +270,7 @@ class FWUpdate(object):
         # get rid of the newline characters
         line=line.strip()
         # is it the answer we are looking for? (yep, should be regexp...)
-        if line[:16] == 'Powering Source:':
+        if line[:16] == 'Powering Source:':    
           # get the power source (yep, should be regexp...)
           ret=line[16:20]
           # in case it is RPI, everything is ok :)
@@ -287,6 +288,7 @@ class FWUpdate(object):
             sys.exit(3)
       # close the connection to PIco via serial
       PIco.close()
+              
     #print 'pwr:',self.power,' pwrw:',self.power_warned,' pwr',self.power
     # in case no power information gathered
     if not self.power:
@@ -296,12 +298,12 @@ class FWUpdate(object):
       else:
         print 'ERROR: System powering mode not detected. System has to be powered via the Pi USB port since here is a PIco reset after a FW update, that would perform hard reset of Pi! Make a proper HW/Pi setup of Serial interface or PiCo interface(I2C) to enable auto-detection. This can happen also in case that PIco is already in the bootload mode having PIco RED led lid. Use --force to disable this check.'
         sys.exit(3)
-
+       
 
   """
   3) Check that there is a PIco bootloader connected to the other side of the serial interface :)
     - Send dummy command and get the confirmation from the bootloader
-
+        
   """
   def serial_check(self):
     print "Checking communication with bootloader:",
@@ -342,11 +344,11 @@ class FWUpdate(object):
     except:
       print "KO\nERROR: Something wrong happened during verification of communication channel with PIco bootloader via port:",self.port,'Please verify that the serial port is availble and not used by some other application.'
       sys.exit(2)
-
+      
     # in case communication not verified
     if not status:
       if self.force:
-        print "KO\nWARNING: Unable to verify communication with bootloader in PIco. Is the PIco in the bootloader mode? (Red LED lid on PIco)"
+        print "KO\nWARNING: Unable to verify communication with bootloader in PIco. Is the PIco in the bootloader mode? (Red LED lid on PIco)"      
       else:
         print "KO\nERROR: Failed to establish communication with bootloader in PIco. Is the PIco in the bootloader mode? (Red LED lid on PIco)"
         sys.exit(2)
@@ -380,11 +382,11 @@ class FWUpdate(object):
       # get the CRC valucalculate CRC
       crc1=int(line[-4:-1],16)
       # calculate the CRC value of the data read
-      crc2=0
+      crc2=0    
       for i in range(1, len(line)-5, 2):
-        #print line[i:i+2]
+        #print line[i:i+2] 
         crc2+=int(line[i:i+2],16)
-      # python cannot simulate byte overruns, so ugly math to be done
+      # python cannot simulate byte overruns, so ugly math to be done 
       crc2%=256
       crc2=255-crc2+1
       crc2%=256
@@ -392,7 +394,7 @@ class FWUpdate(object):
       if crc1!=crc2:
         print "KO\nLine",lnum,': Invalid bytecode checksum! Defined:', crc1,'Calculated:', crc2
         sys.exit(4)
-
+        
       # in case that the done command is detected, than finish
       if target.group(4)=='01':
          valid=True
@@ -411,7 +413,7 @@ class FWUpdate(object):
 
   """
   5) Upload the FW to PIco
-
+        
   """
   def fw_upload(self):
     print "Uploading firmware: 0% ",
@@ -458,12 +460,12 @@ class FWUpdate(object):
     # for each line in the FW file
     for line in f:
       status=False
-      # strp the \r\n and add only \r
+      # strp the \r\n and add only \r 
       line=line.strip()+"\r"
       # send the data to PIco
       PIco.write(line)
       #print "Written:",line
-
+      
 
       # set the wait iterations for the bootloader response
       rcnt=1000
@@ -497,25 +499,25 @@ class FWUpdate(object):
       if lnum2%lnumx==0:
         print ' '+str(round(float(100*lnum2/lnum)))+'% ',
       else:
-        if lrcnt>80:
+        if lrcnt>80: 
           sys.stdout.write('*')
-        elif lrcnt>60:
+        elif lrcnt>60: 
           sys.stdout.write('*')
-        elif lrcnt>40:
+        elif lrcnt>40: 
           sys.stdout.write('*')
-        elif lrcnt>20:
+        elif lrcnt>20: 
           sys.stdout.write('*')
-        else:
+        else: 
           sys.stdout.write('*')
-
+          
       sys.stdout.flush()
     print ' Done uploading...'
-    # close the FW file
+    # close the FW file 
     f.close()
 
   """
   6) Perform factory reset of the PIco
-
+        
   """
   def factory_reset(self):
     print "Invoking factory reset of PIco..."
@@ -528,18 +530,18 @@ class FWUpdate(object):
       pass
     print 'send factory reset command ...'
     time.sleep(1)
-    i2c.write_byte_data(0x6b, 0x00, 0xdd)
+    i2c.write_byte_data(0x6b, 0x00, 0xdd) 
      #close the channel to PIco
     PIco.close()
     print 'ALL Done :) Ready to go...'
 
-
+  
   def usage(self):
     print "\n",sys.argv[0],' -f <fw_file> [ -v | -h | --force | -s | -p serial | -b i2c_bus_number ]',"\n"
     sys.exit(1)
 
 
 if __name__ == "__main__":
-  FWUpdate()
+  FWUpdate()	
 
 
