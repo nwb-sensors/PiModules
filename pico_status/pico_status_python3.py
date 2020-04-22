@@ -94,27 +94,27 @@ def bat_version():
     time.sleep(0.1)
     data = i2c.read_byte_data(0x6b, 0x07)
     if (data == 0x46):
-        return "LiFePO4 (ASCII : F) used in version Stack/Top-End"
+        return "LiFePO4 (ASCII : F) Stack/Top-End"
     elif (data == 0x51):
-        return "LiFePO4 (ASCII : Q) used in version Plus/Advanced"
+        return "LiFePO4 (ASCII : Q) Plus/Advanced"
     elif (data == 0x53):
-        return "LiPO (ASCII: S) used in version Stack/Top-End"
+        return "LiPO (ASCII: S) Stack/Top-End"
     elif (data == 0x50):
-        return "LiPO (ASCII: P) used in version Plus/Advanced"
+        return "LiPO (ASCII: P) Plus/Advanced"
     elif (data == 0x49):
-        return "Li-Ion ASCII : I) used in version Stack/Top-End"
+        return "Li-Ion ASCII : I) Stack/Top-End"
     elif (data == 0x4f):
-        return "Li-Ion (ASCII : O) used in version Plus/Advanced"
+        return "Li-Ion (ASCII : O) Plus/Advanced"
     elif (data == 0x48):
-        return "NiMH (ASCII : H) used in version Stack/Top-End"
+        return "NiMH (ASCII : H) Stack/Top-End"
     elif (data == 0x4d):
-        return "NiMH (ASCII : M) used in version Plus/Advanced"
+        return "NiMH (ASCII : M) Plus/Advanced"
     elif (data == 0x4c):
-        return "SAL (ASCII : L) used in version Stack/Top-End"
+        return "SAL (ASCII : L) Stack/Top-End"
     elif (data == 0x41):
-        return "SAL (ASCII : A) used in version Plus/Advanced"
+        return "SAL (ASCII : A) Plus/Advanced"
     else:
-        return "ERROR"
+        return ("Unknown" + data)
 
 
 def bat_runtime():
@@ -140,12 +140,14 @@ def bat_percentage():
     time.sleep(0.1)
     datavolts = bat_level()
     databattery = bat_version()
-    if (databattery == "LiFePO4 (ASCII : F) used in version Stack/Top-End") or (databattery == "LiFePO4 (ASCII : Q) used in version Plus/Advanced"):
+    if (databattery == "LiFePO4 (ASCII : F) Stack/Top-End") or (databattery == "LiFePO4 (ASCII : Q) Plus/Advanced"):
         databatminus = datavolts-2.90
         datapercentage = (databatminus/0.70)*100
-    elif (databattery == "LiPO (ASCII: S) used in version Stack/Top-End") or (databattery == "LiPO (ASCII: P) used in version Plus/Advanced"):
+    elif (databattery == "LiPO (ASCII: S) Stack/Top-End") or (databattery == "LiPO (ASCII: P) Plus/Advanced"):
         databatminus = datavolts-3.4
         datapercentage = (databatminus/0.899)*100
+    else:
+        datapercentage = 9999
     return int(datapercentage)
 
 
@@ -154,21 +156,14 @@ def charger_state():
     data = i2c.read_byte_data(0x69, 0x20)
     #battpercentage = bat_percentage()
     powermode = pwr_mode()
-    databattery = bat_version()
-    if (databattery == "LiFePO4 (ASCII : F) used in version Stack/Top-End") or (databattery == "LiFePO4 (ASCII : Q) used in version Plus/Advanced"):
-        if (data == 0x00) and (powermode == "BAT POWERED"):
-            return "DISCHARGING"
-        if (data == 0x01) and (powermode == "RPi POWERED"):
-            return "CHARGING"
-        if (data == 0x00) and (powermode == "RPi POWERED"):
-            return "CHARGED"
-    if (databattery == "LiPO (ASCII: S) used in version Stack/Top-End") or (databattery == "LiPO (ASCII: P) used in version Plus/Advanced"):
-        if (data == 0x00) and (powermode == "BAT POWERED"):
-            return "DISCHARGING"
-        if (data == 0x00) and (powermode == "RPi POWERED"):
-            return "CHARGED"
-        if (data == 0x01) and (powermode == "RPi POWERED"):
-            return "CHARGING"
+    if (data == 0x00) and (powermode == "BAT POWERED"):
+        return "DISCHARGING"
+    if (data == 0x01) and (powermode == "RPi POWERED"):
+        return "CHARGING"
+    if (data == 0x00) and (powermode == "RPi POWERED"):
+        return "CHARGED"
+    else:
+        return "ERROR"
 
 
 def rpi_level():
@@ -297,6 +292,12 @@ def rs232_state():
         return "ON @ 115200 pbs"
     else:
         return "ERROR"
+
+
+# def cpu_temp():
+#     temp_cpu = os.popen("/sys/class/thermal/thermal_zone0/temp").readline()
+#     temp_cpu = temp_cpu / 100
+#     return (temp_cpu)
 
 
 print(" ")
