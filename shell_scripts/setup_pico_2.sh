@@ -1,4 +1,7 @@
 #!/bin/bash
+# sudo access check
+  source ./auth.sh
+  
   echo '--- show picofssd service status'
   service picofssd status
   echo '--- is UPS PICo running on Cable (0x01) or Bat (0x02)'
