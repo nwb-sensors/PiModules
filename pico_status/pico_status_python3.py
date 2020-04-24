@@ -114,7 +114,7 @@ def bat_version():
     elif (data == 0x41):
         return "SAL (ASCII : A) Plus/Advanced"
     else:
-        return ("Unknown" + data)
+        return ("Unknown " + hex(data))
 
 
 def bat_runtime():
