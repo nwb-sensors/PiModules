@@ -58,8 +58,8 @@
   #(cd ../code/python/upspico/picofssd && sudo python setup.py install)
   echo '  cat $HOME/upsfssd_install.log | xargs sudo rm'
   (cd ../code/python/upspico/picofssd && sudo python setup.py install --record $HOME/upsfssd_install.log)
-  sudo systemctl enable picofssd.service)
-  sudo systemctl start picofssd.servic
+  sudo systemctl enable picofssd.service
+  sudo systemctl start picofssd.service
   
   echo '--------------------------------------------------------------------------------'
   echo '--- MAKE SURE THE FOLLOWING LINES ARE COMMENTED OUT IN /lib/udev.hwclock-set ---'
@@ -70,7 +70,7 @@
   echo '--- Press a key to continue ---'
   read key
   sudo nano /lib/udev/hwclock-set
-  sudo hwclock -w
+  # sudo hwclock -w
   echo '--- all done, rebooting'
   sudo shutdown -r
   #exit 0
