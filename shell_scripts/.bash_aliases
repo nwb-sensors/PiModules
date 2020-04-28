@@ -1,0 +1,7 @@
+alias gputemp='/opt/vc/bin/vcgencmd measure_temp'
+alias la='ls -la'
+alias cputemp='cat /sys/class/thermal/thermal_zone0/temp'
+alias upsstat='python3 $HOME/PiModules/pico_status/pico_status_python3.py'
+alias ..='cd ..'
+alias upstool='sh $HOME/PiModules/shell_scripts/tools.sh'
+alias ssdtemp='python3 $HOME/PiModules/pico_status/ssd_temp.py'
