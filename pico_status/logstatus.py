@@ -1,34 +1,35 @@
-#!/usr/bin/python
+"""
+Monitor the UPS pico status headless.
+
+pico_status.py
+author : Kyriakos Naziris
+modified by : Siewert Lameijer aka Siewert308SW
+modified by : janmagnet
+since : 31-12-2016
+updated : 10-06-2019
+Script to show you some statistics pulled from your UPS PIco HV3.0A/B/B+
+
+improved and completed by PiModules Version 1.0 29.08.2015
+picoStatus-v3.py by KTB is based on upisStatus.py by Kyriakos Naziris
+Kyriakos Naziris / University of Portsmouth / kyriakos@naziris.co.uk
+
+Improved and modified for PiModules PIco HV3.0A Stack Plus / Plus / Top
+by Siewert Lameijer aka Siewert308SW
+
+Improved for PiModules PIco HV3.0B/B+ by janmagnet
+
+Improved by adding system information (SysInfo) from register 0x69 0x28 word
+this reports back the 4 digit code
+see Table 9 UPS PIco HV3.0 HAT SysInfo PIco Register in the manual
+note that this register needs to be manually reset using
+sudo "i2cset -y 1 0x69 0x28 0x0000 w" by MMinehan
+"""
+# !/usr/bin/python
+
 import os
 import smbus
 import time
 import subprocess
-
-###############################################################################
-# pico_status.py
-# author : Kyriakos Naziris
-# modified by : Siewert Lameijer aka Siewert308SW
-# modified by : janmagnet
-# since : 31-12-2016
-# updated : 10-06-2019
-# Script to show you some statistics pulled from your UPS PIco HV3.0A/B/B+
-
-# -*- coding: utf-8 -*-
-# improved and completed by PiModules Version 1.0 29.08.2015
-# picoStatus-v3.py by KTB is based on upisStatus.py by Kyriakos Naziris
-# Kyriakos Naziris / University of Portsmouth / kyriakos@naziris.co.uk
-#
-# Improved and modified for PiModules PIco HV3.0A Stack Plus / Plus / Top
-# by Siewert Lameijer aka Siewert308SW
-#
-# Improved for PiModules PIco HV3.0B/B+ by janmagnet
-#
-# Improved by adding system information (SysInfo) from register 0x69 0x28 word
-# this reports back the 4 digit code
-# see Table 9 UPS PIco HV3.0 HAT SysInfo PIco Register in the manual
-# note that this register needs to be manually reset using
-# sudo "i2cset -y 1 0x69 0x28 0x0000 w" by MMinehan
-###############################################################################
 
 ###############################################################################
 # SETTINGS
@@ -142,10 +143,10 @@ def bat_percentage():
     time.sleep(0.1)
     datavolts = bat_level()
     databattery = bat_version()
-    if (databattery == "LiFePO4 (ASCII : F) Stack/Top-End") or (databattery == "LiFePO4 (ASCII : Q) Plus/Advanced"):
+    if (databattery == "LiFePOx51") or (databattery == "LiFePOx46"):
         databatminus = datavolts-2.90
         datapercentage = (databatminus/0.70)*100
-    elif (databattery == "LiPO (ASCII: S) Stack/Top-End") or (databattery == "LiPO (ASCII: P) Plus/Advanced"):
+    elif (databattery == "LiPO 0x53") or (databattery == "LiPO 0x50"):
         databatminus = datavolts-3.4
         datapercentage = (databatminus/0.899)*100
     else:
@@ -156,7 +157,7 @@ def bat_percentage():
 def charger_state():
     time.sleep(0.1)
     data = i2c.read_byte_data(0x69, 0x20)
-    #battpercentage = bat_percentage()
+    # battpercentage = bat_percentage()
     powermode = pwr_mode()
     if (data == 0x00) and (powermode == "BAT"):
         return "DISCHARG"
@@ -295,6 +296,7 @@ def rs232_state():
     else:
         return "ERROR"
 
+
 def get_ssd_temp(path="/dev/sda"):
     """Call to return the SSD tempurature reading from smartctl."""
     cmd = ["sudo", "smartctl", path, "-a"]
@@ -312,50 +314,48 @@ def get_ssd_temp(path="/dev/sda"):
 #     return (temp_cpu)
 
 
-#print(" ")
-#print("**********************************************")
-#print("*         UPS PIco HV3.0A/B/B+ Status        *")
-#print("*                 Version 7.0                *")
-
 print("DATE      , TIME    , TZ , FW, BL,PCB, BAT Type , BatRun,RS232," +
       " Src, Chrgr St, BAT V, RPi V, RPiTmp, UPSTmp, SSDTmp")
 
 print(time.strftime("%Y-%m-%d, %H:%M:%S, %Z", time.localtime()) + ",",
-      fw_version() + ",", boot_version() +  ",", pcb_version() + ",",
-      bat_version() + ",", bat_runtime() +  ",", rs232_state() + " ,",
+      fw_version() + ",", boot_version() + ",", pcb_version() + ",",
+      bat_version() + ",", bat_runtime() + ",", rs232_state() + " ,",
       pwr_mode() + ",", charger_state() + ",", bat_level(), "V,",
       rpi_level(), "V,", rpi_cpu_temp(), "C,", ntc1_temp(), "C,",
       get_ssd_temp(), "C")
 
+# print(" ")
+# print("**********************************************")
+# print("*         UPS PIco HV3.0A/B/B+ Status        *")
+# print("*                 Version 7.0                *")
+# print("**********************************************")
+# print(" ", time.strftime("%Y-%m-%d, %H:%M:%S, %Z", time.localtime()))
+# print(" ", "- PIco Firmware..........:", fw_version())
+# print(" ", "- PIco Bootloader........:", boot_version())
+# print(" ", "- PIco PCB Version.......:", pcb_version())
+# print(" ", "- PIco BAT Version.......:", bat_version())
+# print(" ", "- PIco BAT Runtime.......:", bat_runtime())
+# print(" ", "- PIco rs232 State.......:", rs232_state())
+# print(" ")
+# print(" ", "- Powering Mode..........:", pwr_mode())
+# print(" ", "- Charger State..........:", charger_state())
+# print(" ", "- Battery Percentage.....:", bat_percentage(), "%")
+# print(" ", "- Battery Voltage........:", bat_level(), "V")
+# print(" ", "- RPi Voltage............:", rpi_level(), "V")
+# print(" ")
 
-#print("**********************************************")
-#print(" ", time.strftime("%Y-%m-%d, %H:%M:%S, %Z", time.localtime()))
-#print(" ", "- PIco Firmware..........:", fw_version())
-#print(" ", "- PIco Bootloader........:", boot_version())
-#print(" ", "- PIco PCB Version.......:", pcb_version())
-#print(" ", "- PIco BAT Version.......:", bat_version())
-#print(" ", "- PIco BAT Runtime.......:", bat_runtime())
-#print(" ", "- PIco rs232 State.......:", rs232_state())
-#print(" ")
-#print(" ", "- Powering Mode..........:", pwr_mode())
-#print(" ", "- Charger State..........:", charger_state())
-#print(" ", "- Battery Percentage.....:", bat_percentage(), "%")
-#print(" ", "- Battery Voltage........:", bat_level(), "V")
-#print(" ", "- RPi Voltage............:", rpi_level(), "V")
-#print(" ")
-
-#if (degrees == "C"):
-#    print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "C")
-#    print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "C")
-#    print(" ", "- SSD Temperature........:", get_ssd_temp(), "C")
-#elif (degrees == "F"):
-#    print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "F")
-#    print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "F")
-#else:
-#    print(" ", "- RPi CPU Temperature....: " +
-#          "please set temperature symbol in the script!")
-#    print(" ", "- NTC1 Temperature.......: " +
-#          "please set temperature symbol in the script!")
+# if (degrees == "C"):
+#     print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "C")
+#     print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "C")
+#     print(" ", "- SSD Temperature........:", get_ssd_temp(), "C")
+# elif (degrees == "F"):
+#     print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "F")
+#     print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "F")
+# else:
+#     print(" ", "- RPi CPU Temperature....: " +
+#           "please set temperature symbol in the script!")
+#     print(" ", "- NTC1 Temperature.......: " +
+#           "please set temperature symbol in the script!")
 
 if to92 is True:
     if (degrees == "C"):
@@ -373,8 +373,8 @@ if extpwr is True:
 if fankit is True:
     print(" ")
     if (fan_mode() == "AUTOMATIC"):
-        print(" ", "- PIco FAN Mode..........:", fan_mode(), "    (0x6b,0x11)")
-        print(" ", "- PIco FAN State.........:", fan_state(), "    (0x6b,0x13)")
+        print(" ", "- PIco FAN Mode..........:", fan_mode(), "   (0x6b,0x11)")
+        print(" ", "- PIco FAN State.........:", fan_state(), "   (0x6b,0x13)")
         print(" ", "- PIco FAN Speed.........:", fan_speed(), "RPM")
 
         if (degrees == "C"):
@@ -399,9 +399,9 @@ if fankit is True:
             print(" ", "- PIco FAN Temp Threshold: " +
                   "please set temperature symbol in the script!")
 
-#print(" ", "- System Information.....:", sys_info())
-#print(" ")
-#print("**********************************************")
-#print("*           Powered by PiModules             *")
-#print("**********************************************")
-#print(" ")
+# print(" ", "- System Information.....:", sys_info())
+# print(" ")
+# print("**********************************************")
+# print("*           Powered by PiModules             *")
+# print("**********************************************")
+# print(" ")
