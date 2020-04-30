@@ -84,38 +84,38 @@ def pwr_mode():
     data = i2c.read_byte_data(0x69, 0x00)
     data = data & ~(1 << 7)
     if (data == 1):
-        return "RPi POWERED"
+        return "RPi"
     elif (data == 2):
-        return "BAT POWERED"
+        return "BAT"
     else:
-        return "ERROR"
+        return "ERR"
 
 
 def bat_version():
     time.sleep(0.1)
     data = i2c.read_byte_data(0x6b, 0x07)
     if (data == 0x46):
-        return "LiFePO4 (ASCII : F) Stack/Top-End"
+        return "LiFePOx46"
     elif (data == 0x51):
-        return "LiFePO4 (ASCII : Q) Plus/Advanced"
+        return "LiFePOx51"
     elif (data == 0x53):
-        return "LiPO (ASCII: S) Stack/Top-End"
+        return "LiPO 0x53"
     elif (data == 0x50):
-        return "LiPO (ASCII: P) Plus/Advanced"
+        return "LiPO 0x50"
     elif (data == 0x49):
-        return "Li-Ion ASCII : I) Stack/Top-End"
+        return "LiIon0x49"
     elif (data == 0x4f):
-        return "Li-Ion (ASCII : O) Plus/Advanced"
+        return "LiIon0x4f"
     elif (data == 0x48):
-        return "NiMH (ASCII : H) Stack/Top-End"
+        return "NiMH 0x48"
     elif (data == 0x4d):
-        return "NiMH (ASCII : M) Plus/Advanced"
+        return "NiMH 0x4d"
     elif (data == 0x4c):
-        return "SAL (ASCII : L) Stack/Top-End"
+        return "SAL  0x4c"
     elif (data == 0x41):
-        return "SAL (ASCII : A) Plus/Advanced"
+        return "SAL  0x41"
     else:
-        return ("Unknown " + hex(data))
+        return ("UNKN " + hex(data))
 
 
 def bat_runtime():
@@ -138,6 +138,7 @@ def bat_level():
 
 
 def bat_percentage():
+    '''This Is Broke.'''
     time.sleep(0.1)
     datavolts = bat_level()
     databattery = bat_version()
@@ -157,14 +158,14 @@ def charger_state():
     data = i2c.read_byte_data(0x69, 0x20)
     #battpercentage = bat_percentage()
     powermode = pwr_mode()
-    if (data == 0x00) and (powermode == "BAT POWERED"):
-        return "DISCHARGING"
-    if (data == 0x01) and (powermode == "RPi POWERED"):
+    if (data == 0x00) and (powermode == "BAT"):
+        return "DISCHARG"
+    if (data == 0x01) and (powermode == "RPi"):
         return "CHARGING"
-    if (data == 0x00) and (powermode == "RPi POWERED"):
-        return "CHARGED"
+    if (data == 0x00) and (powermode == "RPi"):
+        return "CHARGED!"
     else:
-        return "ERROR"
+        return "ERRORRRR"
 
 
 def rpi_level():
@@ -172,7 +173,7 @@ def rpi_level():
     data = i2c.read_word_data(0x69, 0x0a)
     data = format(data, "02x")
     powermode = pwr_mode()
-    if (powermode == "RPi POWERED"):
+    if (powermode == "RPi"):
         return (float(data) / 100)
     else:
         return "0.0"
@@ -315,34 +316,46 @@ def get_ssd_temp(path="/dev/sda"):
 #print("**********************************************")
 #print("*         UPS PIco HV3.0A/B/B+ Status        *")
 #print("*                 Version 7.0                *")
-print("**********************************************")
-print(" ", time.strftime("%Y-%m-%d, %H:%M:%S, %Z", time.localtime()))
-print(" ", "- PIco Firmware..........:", fw_version())
-print(" ", "- PIco Bootloader........:", boot_version())
-print(" ", "- PIco PCB Version.......:", pcb_version())
-print(" ", "- PIco BAT Version.......:", bat_version())
-print(" ", "- PIco BAT Runtime.......:", bat_runtime())
-print(" ", "- PIco rs232 State.......:", rs232_state())
+
+print("DATE      , TIME    , TZ , FW, BL,PCB, BAT Type , BatRun,RS232," +
+      " Src, Chrgr St, BAT V, RPi V, RPiTmp, UPSTmp, SSDTmp")
+
+print(time.strftime("%Y-%m-%d, %H:%M:%S, %Z", time.localtime()) + ",",
+      fw_version() + ",", boot_version() +  ",", pcb_version() + ",",
+      bat_version() + ",", bat_runtime() +  ",", rs232_state() + " ,",
+      pwr_mode() + ",", charger_state() + ",", bat_level(), "V,",
+      rpi_level(), "V,", rpi_cpu_temp(), "C,", ntc1_temp(), "C,",
+      get_ssd_temp(), "C")
+
+
+#print("**********************************************")
+#print(" ", time.strftime("%Y-%m-%d, %H:%M:%S, %Z", time.localtime()))
+#print(" ", "- PIco Firmware..........:", fw_version())
+#print(" ", "- PIco Bootloader........:", boot_version())
+#print(" ", "- PIco PCB Version.......:", pcb_version())
+#print(" ", "- PIco BAT Version.......:", bat_version())
+#print(" ", "- PIco BAT Runtime.......:", bat_runtime())
+#print(" ", "- PIco rs232 State.......:", rs232_state())
 #print(" ")
-print(" ", "- Powering Mode..........:", pwr_mode())
-print(" ", "- Charger State..........:", charger_state())
+#print(" ", "- Powering Mode..........:", pwr_mode())
+#print(" ", "- Charger State..........:", charger_state())
 #print(" ", "- Battery Percentage.....:", bat_percentage(), "%")
-print(" ", "- Battery Voltage........:", bat_level(), "V")
-print(" ", "- RPi Voltage............:", rpi_level(), "V")
+#print(" ", "- Battery Voltage........:", bat_level(), "V")
+#print(" ", "- RPi Voltage............:", rpi_level(), "V")
 #print(" ")
 
-if (degrees == "C"):
-    print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "C")
-    print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "C")
-    print(" ", "- SSD Temperature........:", get_ssd_temp(), "C")
-elif (degrees == "F"):
-    print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "F")
-    print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "F")
-else:
-    print(" ", "- RPi CPU Temperature....: " +
-          "please set temperature symbol in the script!")
-    print(" ", "- NTC1 Temperature.......: " +
-          "please set temperature symbol in the script!")
+#if (degrees == "C"):
+#    print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "C")
+#    print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "C")
+#    print(" ", "- SSD Temperature........:", get_ssd_temp(), "C")
+#elif (degrees == "F"):
+#    print(" ", "- RPi CPU Temperature....:", rpi_cpu_temp(), "F")
+#    print(" ", "- NTC1 Temperature.......:", ntc1_temp(), "F")
+#else:
+#    print(" ", "- RPi CPU Temperature....: " +
+#          "please set temperature symbol in the script!")
+#    print(" ", "- NTC1 Temperature.......: " +
+#          "please set temperature symbol in the script!")
 
 if to92 is True:
     if (degrees == "C"):
