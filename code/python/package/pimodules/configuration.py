@@ -17,9 +17,6 @@ DEFAULT_FSSD_XML_CONFIG ="""<?xml version="1.0" encoding="utf-8"?>
 				<fssd:security></fssd:security>
 				<fssd:port>0</fssd:port>
 			</fssd:email>
-			<fssd:custom-script>
-				<fssd:script></fssd:script>
-			</fssd:custom-script>
 		</fssd:alerts>
 	</fssd:config>
 </root>
@@ -48,3 +45,5 @@ def write_config_xml(xmlfile, dict):
 		return False
 
 	return True
+
+
