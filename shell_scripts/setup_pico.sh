@@ -4,7 +4,7 @@
 # along with edits made by @htkoca
 
 # sudo access check
-  source ./auth.sh
+  source $HOME/PiModules/shell_scripts/auth.sh
   set -e
 
 # main script
@@ -54,10 +54,10 @@
   #(cd ../code/python/package && sudo python setup.py install)
   echo '--- TO REMOVE/UNINSTALL:'
   echo '  cat $HOME/upspico_install.log | xargs sudo rm'
-  (cd ../code/python/package && sudo python setup.py install --record $HOME/upspico_install.log)
+  (cd $HOME/PiModules/code/python/package && sudo python setup.py install --record $HOME/upspico_install.log)
   #(cd ../code/python/upspico/picofssd && sudo python setup.py install)
   echo '  cat $HOME/upsfssd_install.log | xargs sudo rm'
-  (cd ../code/python/upspico/picofssd && sudo python setup.py install --record $HOME/upsfssd_install.log)
+  (cd $HOME/PiModules/code/python/upspico/picofssd && sudo python setup.py install --record $HOME/upsfssd_install.log)
   sudo systemctl enable picofssd.service
   sudo systemctl start picofssd.service
   
