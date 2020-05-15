@@ -22,6 +22,7 @@
   sudo pip install psutil
   echo '--- pip install python3 stuff'
   sudo pip3 install simplejson
+  sudo pip3 install pysmart
   echo '--- pip install xmltodict'
   sudo pip install xmltodict
   echo 'updating Rpi4 bootloader'
