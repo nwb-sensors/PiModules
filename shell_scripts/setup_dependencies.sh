@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # sudo access check
-  source ./auth.sh
+  source /home/pi/auth.sh
   set -e
 
 # main
@@ -14,8 +14,8 @@
   # echo '--- rpi-update'
   # sudo rpi-update
   echo '--- install some packages'
-  sudo apt-get install -y git htop wget dialog sqlite3 python3-pip python3-smbus nmap vim smartmontools
-  sudo apt-get install -y python-dev python-pip python-serial python-smbus python-jinja2 python-xmltodict python-psutil i2c-tools libi2c-dev
+  sudo apt-get install -y git htop wget dialog sqlite3 python3-pip python3-smbus nmap vim smartmontools --fix-missing
+  sudo apt-get install -y python-dev python-pip python-serial python-smbus python-jinja2 python-xmltodict python-psutil i2c-tools libi2c-dev --fix-missing
   echo '--- pip install rpi.gpio'
   sudo pip install RPi.GPIO
   echo '--- pip install psutil'
