@@ -22,6 +22,7 @@
   sudo pip install psutil
   echo '--- pip install python3 stuff'
   sudo pip3 install simplejson
+  sudo pip3 install pythonping
   sudo pip3 install pysmart
   sudo pip3 install mysql-connector
   echo '--- pip install xmltodict'
