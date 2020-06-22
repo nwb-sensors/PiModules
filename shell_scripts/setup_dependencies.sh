@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # sudo access check
-source $HOME/pimodules/auth.sh
+source $HOME/PiModules/auth.sh
 set -e
 
 # main
@@ -29,6 +29,30 @@ echo '--- pip install xmltodict'
 sudo pip install xmltodict
 echo 'updating Rpi4 bootloader'
 sudo rpi-eeprom-update -a
+echo 'Configuring static ip stuff'
+if grep -Fxq "profile static_wlan0" /etc/dhcpcd.conf; then
+	echo "Profile set"
+else
+	sudo echo 'profile static_wlan0' >> /etc/dhcpcd.conf
+fi
+
+if grep -Fxq "static ip_address=192.168.0.117" /etc/dhcpcd.conf; then
+	echo "Address set"
+else
+	sudo echo 'static ip_address=192.168.0.117' >> /etc/dhcpcd.conf
+fi
+
+if grep -Fxq "static routers=192.168.0.1" /etc/dhcpcd.conf; then
+	echo "Router set"
+else
+	sudo echo 'static router=192.168.0.1' >> /etc/dhcpcd.conf
+fi
+
+if grep -Fxq "fallback static_wlan0" /etc/dhcpcd.conf; then
+	echo "Fallback set"
+else
+	sudo echo 'fallback static_wlan0' >> /etc/dhcpcd.conf
+fi
 echo '--- all done, rebooting'
-sudo reboot
+#sudo reboot
 exit 0
